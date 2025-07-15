@@ -50,7 +50,3 @@ Este proyecto es una aplicación web interactiva creada con Streamlit que permit
 
 3. **Acceder a la aplicación**
    - Abre tu navegador en `http://localhost:8501`
-
----
-
-*¡Listo! Ahora puedes procesar tus PDF de forma local o aislada con Docker.*
