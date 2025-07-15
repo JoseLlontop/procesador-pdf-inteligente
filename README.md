@@ -10,7 +10,7 @@ Este proyecto es una aplicación web interactiva creada con Streamlit que permit
    cd <NOMBRE_DEL_PROYECTO>
    ```
 
-2. **Crear y activar entorno virtual (opcional pero recomendado)**
+2. **Crear y activar entorno virtual (opcional)**
    ```bash
    python3 -m venv venv
    source venv/bin/activate  # En Windows: venv\Scripts\activate
@@ -27,7 +27,6 @@ Este proyecto es una aplicación web interactiva creada con Streamlit que permit
      GEMINI_API_KEY=tu_clave_gemini
      DEEPSEEK_API_KEY=tu_clave_deepseek
      ```
-   - Asegúrate de no subir el archivo `.env` al repositorio (agregar a `.gitignore`).
 
 5. **Ejecutar la aplicación**
    ```bash
