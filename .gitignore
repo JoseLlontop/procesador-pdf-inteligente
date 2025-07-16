@@ -8,3 +8,7 @@ venv/
 
 # Otros archivos comunes
 .DS_Store
+
+# Caché de embeddings
+embedding_cache/
+*.pkl

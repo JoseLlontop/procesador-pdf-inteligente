@@ -12,7 +12,7 @@ if not API_KEY:
 
 client = OpenAI(api_key=API_KEY, base_url="https://api.deepseek.com")
 
-def call_deepseek(ideas: list[str], num_questions: int = 5) -> list[dict]:
+def call_deepseek(ideas: list[str], num_questions: int = 8) -> list[dict]:
     """
     Genera preguntas MCQ en español basadas en 'ideas'.
     Devuelve lista de dicts con 'question', 'options' y 'correct_answer'.
@@ -20,9 +20,12 @@ def call_deepseek(ideas: list[str], num_questions: int = 5) -> list[dict]:
     system_msg = {
         "role": "system",
         "content": (
-            f"Eres un generador de preguntas de examen. "
-            f"Genera EXACTAMENTE {num_questions} preguntas de opción múltiple en español, "
-            "cada una con 4 opciones y la respuesta correcta.\n\n"
+            f"Eres un experto diseñador de evaluaciones académicas en español."
+            f"Genera EXACTAMENTE {num_questions} preguntas de opción múltiple claras, variadas y relevantes"
+            "Incluye 4 opciones por pregunta y marca la correcta. "
+            "Cada pregunta debe abordar un concepto importante distinto del texto, "
+            "evitando repeticiones temáticas y cubriendo la mayor cantidad posible de ideas. "
+            "Las preguntas deben ser precisas, no ambiguas, y con distractores plausibles pero incorrectos. "
             "IMPORTANTE: Devuelve ÚNICA y EXCLUSIVAMENTE un JSON válido con clave \"questions\" "
             "y dentro de cada elemento: \"question\", \"options\" y \"correct_answer\"."
         )

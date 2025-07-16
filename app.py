@@ -127,9 +127,20 @@ if uploaded_file:
         # Preparar listas
         preguntas_text = [q['question'] for q in questions]
         distractores_list = [q['options'] for q in questions]
-
+        
+        # Calcular métricas optimizadas
         rel = semantic_relevance_score(cleaned_text, preguntas_text)
-        idx_d = np.mean([distractor_quality_index(c, d) for c, d in zip(answers, distractores_list)])
+        
+        # Calcular calidad de distractores por pregunta
+        dist_qualities = []
+        for q in questions:
+            correct = q.get('correct_answer', '')
+            distractors = [d for d in q.get('options', []) if d != correct]
+            if distractors:
+                dq = distractor_quality_index(correct, distractors)
+                dist_qualities.append(dq)
+        idx_d = np.mean(dist_qualities) if dist_qualities else 0.0
+        
         cov = concept_coverage_semantic(ideas, preguntas_text, top_k=25, threshold=0.4)
         div = question_diversity(preguntas_text)
 
