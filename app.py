@@ -177,9 +177,5 @@ if uploaded_file:
         st.metric("Cobertura de conceptos (%)", f"{cov:.1f}%")
         st.metric("Diversidad de preguntas", f"{div:.2f}")
 
-    # Botón para reiniciar
-    if st.button("🔄 Procesar Otro Archivo"):
-        st.experimental_rerun()
-
 else:
     st.info("👆 Por favor, sube un archivo PDF para comenzar.")
