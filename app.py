@@ -11,7 +11,7 @@ from deepseek_client import call_deepseek
 from metricas import (
     semantic_relevance_score,
     distractor_quality_index,
-    concept_coverage,
+    concept_coverage_semantic,
     question_diversity
 )
 
@@ -130,7 +130,7 @@ if uploaded_file:
 
         rel = semantic_relevance_score(cleaned_text, preguntas_text)
         idx_d = np.mean([distractor_quality_index(c, d) for c, d in zip(answers, distractores_list)])
-        cov = concept_coverage(cleaned_text, preguntas_text)
+        cov = concept_coverage_semantic(ideas, preguntas_text, top_k=25, threshold=0.4)
         div = question_diversity(preguntas_text)
 
         st.metric("Relevancia semántica promedio", f"{rel:.2f}")

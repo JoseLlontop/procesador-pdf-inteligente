@@ -38,22 +38,42 @@ def distractor_quality_index(correct: str, distractors: list[str]) -> float:
     return float(1 - np.mean(sims))
 
 # 3. Cobertura de conceptos (%)
-def concept_coverage(text: str, questions: list[str], top_k: int = 20) -> float:
+def concept_coverage_semantic(text: str | list[str], questions: list[str],
+                              top_k: int = 20,
+                              threshold: float = 0.5) -> float:
     """
-    Extrae las top_k keywords de text via TF-IDF y retorna el % cubierto por las preguntas.
+    TF-IDF extrae top_k keywords, luego mide para
+    cada keyword si existe alguna pregunta cuya
+    similitud coseno >= threshold.
     """
-    spanish_stopwords = stopwords.words('spanish')
-    vectorizer = TfidfVectorizer(max_features=top_k, stop_words=spanish_stopwords)
-    
-    X = vectorizer.fit_transform([text])
-    keywords = vectorizer.get_feature_names_out()
+    if isinstance(text, list):
+        text = " ".join(text)
+    if not text.strip() or not questions:
+        return 0.0
+
+    # 1) Extraer keywords
+    spanish_sw = stopwords.words('spanish')
+    vec = TfidfVectorizer(max_features=top_k, stop_words=spanish_sw)
+    kw_matrix = vec.fit_transform([text])
+    keywords = vec.get_feature_names_out()
+    if len(keywords) == 0:
+        return 0.0
+
+    # 2) Embeddings de keywords y preguntas
+    kw_emb = model.encode(keywords, convert_to_numpy=True)
+    q_emb  = model.encode(questions, convert_to_numpy=True)
+    if q_emb.ndim == 1:
+        q_emb = q_emb.reshape(1, -1)
+
+    # 3) Cuentas cuántas keywords superan el umbral
     covered = 0
-    for kw in keywords:
-        for q in questions:
-            if SequenceMatcher(None, kw, q).ratio() > 0.8:
-                covered += 1
-                break
+    for kw_vec in kw_emb:
+        sims = cosine_similarity([kw_vec], q_emb).flatten()
+        if np.any(sims >= threshold):
+            covered += 1
+
     return covered / len(keywords) * 100
+
 
 # 4. Diversidad de preguntas (0-1)
 def question_diversity(questions: list[str]) -> float:
