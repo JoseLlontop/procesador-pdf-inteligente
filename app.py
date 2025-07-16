@@ -51,24 +51,46 @@ if uploaded_file:
     cleaned_text = clean_text(raw_text)
 
     # 3. Extraer tablas y obtener CSV
+
     status_text.text("📊 Extrayendo tablas del PDF...")
     progress_bar.progress(45)
-    # Reiniciar puntero del archivo antes de la siguiente lectura
-    uploaded_file.seek(0)
-    with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
-        tmp.write(uploaded_file.read())
-        tmp.flush()
-        table_csv = extraer_tablas(tmp.name)
+    
+    # Variable para controlar si hay tablas
+    hay_tablas = False
+    table_csv = ""
+    table_summary = []
 
-    # 4. Interpretación de tablas con Gemini
-    status_text.text("🔍 Interpretando tablas con Gemini...")
-    progress_bar.progress(60)
-    table_summary = call_gemini_analyzer(table_csv)
-    # Eliminar líneas vacías y asteriscos
-    table_summary = [line.replace('*', '').strip() for line in table_summary if line.strip()]
+    try:
+        uploaded_file.seek(0)
+        with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
+            tmp.write(uploaded_file.read())
+            tmp.flush()
+            table_csv = extraer_tablas(tmp.name)
+            
+            # Verificar si realmente hay tablas
+            if table_csv and table_csv.strip():
+                hay_tablas = True
+                
+                # 4. Interpretación de tablas con Gemini
+                status_text.text("🔍 Interpretando tablas con Gemini...")
+                progress_bar.progress(60)
+                table_summary = call_gemini_analyzer(table_csv)
+                # Eliminar líneas vacías y asteriscos
+                table_summary = [line.replace('*', '').strip() 
+                                for line in table_summary if line.strip()]
+    except Exception as e:
+        st.error(f"Error procesando tablas: {str(e)}")
+        hay_tablas = False
 
     # 5. Concatenar interpretación al texto limpio
-    enhanced_text = cleaned_text + "\n\n" + "\n".join(table_summary)
+    if hay_tablas:
+        enhanced_text = cleaned_text + "\n\n" + "\n".join(table_summary)
+        progress_bar.progress(65)  # Avance adicional
+    else:
+        enhanced_text = cleaned_text
+        status_text.text("ℹ️ No se encontraron tablas en el PDF")
+        sleep(1)  
+        progress_bar.progress(65)  # Avance al mismo punto
 
     # 6. Ideas principales generadas por Gemini (texto + resumen de tablas)
     status_text.text("💡 Extrayendo ideas principales...")
@@ -98,14 +120,18 @@ if uploaded_file:
     with st.expander("🧹 Texto Limpio", expanded=True):
         st.text_area("Texto Limpio", cleaned_text, height=200, label_visibility="collapsed")
 
-    # CSV de tablas
-    with st.expander("📑 Tablas Encontradas", expanded=False):
-        st.text_area("Tablas Encontradas", table_csv, height=200, label_visibility="collapsed")
+    if hay_tablas:
+        # CSV de tablas
+        with st.expander("📑 Tablas Encontradas", expanded=False):
+            st.text_area("Tablas Encontradas", table_csv, height=200, label_visibility="collapsed")
 
-    # Interpretación de tablas
-    with st.expander("🗒️ Interpretación de Tablas", expanded=False):
-        for i, line in enumerate(table_summary, 1):
-            st.markdown(f"**{i}.** {line}")
+        # Interpretación de tablas
+        with st.expander("🗒️ Interpretación de Tablas", expanded=False):
+            if table_summary:
+                for i, line in enumerate(table_summary, 1):
+                    st.markdown(f"**{i}.** {line}")
+            else:
+                st.warning("No se pudo interpretar las tablas")
 
     # Ideas principales finales
     with st.expander("💡 Ideas Principales", expanded=False):
