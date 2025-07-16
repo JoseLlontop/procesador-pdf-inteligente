@@ -1,12 +1,20 @@
 import streamlit as st
 from dotenv import load_dotenv
 import time
+import numpy as np
 
 # Importa tus módulos existentes
 from extraer_pdf import extract_text_from_pdf
 from limpieza_texto import clean_text
 from gemini_client import call_gemini
 from deepseek_client import call_deepseek
+from metricas import (
+    semantic_relevance_score,
+    distractor_quality_index,
+    concept_coverage,
+    question_diversity
+)
+
 
 # Carga variables de entorno (.env)
 load_dotenv()
@@ -113,6 +121,22 @@ if uploaded_file:
     with st.expander("✅ Respuestas", expanded=False):
         for i, ans in enumerate(answers, 1):
             st.markdown(f"**{i}.** {ans}")
+
+    # Métricas de calidad
+    with st.expander("📈 Métricas de Calidad", expanded=True):
+        # Preparar listas
+        preguntas_text = [q['question'] for q in questions]
+        distractores_list = [q['options'] for q in questions]
+
+        rel = semantic_relevance_score(cleaned_text, preguntas_text)
+        idx_d = np.mean([distractor_quality_index(c, d) for c, d in zip(answers, distractores_list)])
+        cov = concept_coverage(cleaned_text, preguntas_text)
+        div = question_diversity(preguntas_text)
+
+        st.metric("Relevancia semántica promedio", f"{rel:.2f}")
+        st.metric("Índice calidad distractores", f"{idx_d:.2f}")
+        st.metric("Cobertura de conceptos (%)", f"{cov:.1f}%")
+        st.metric("Diversidad de preguntas", f"{div:.2f}")
 
     # Botón para reiniciar
     if st.button("🔄 Procesar Otro Archivo"):
