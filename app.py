@@ -95,15 +95,19 @@ if uploaded_file:
     # 6. Ideas principales generadas por Gemini (texto + resumen de tablas)
     status_text.text("💡 Extrayendo ideas principales...")
     progress_bar.progress(75)
+    #enhanced_text es el texto limpio de PDF + resumen de tablas
     ideas = call_gemini(enhanced_text)
 
     # 7. Generar preguntas con DeepSeek
     status_text.text("❓ Generando preguntas con DeepSeek...")
     progress_bar.progress(90)
+    #pasamos las ideas principales a DeepSeek para generar preguntas
     questions = call_deepseek(ideas, num_questions=len(ideas))
+    #questions es una lista de diccionarios con 'question', 'options' y 'correct_answer'
 
     # 8. Obtener respuestas
     answers = [q.get('correct_answer', '') for q in questions]
+    #answers se obtiene almacenando las respuestas correctas de cada pregunta en la lista de preguntas
 
     # Fin del procesamiento
     progress_bar.progress(100)

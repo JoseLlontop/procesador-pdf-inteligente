@@ -38,6 +38,7 @@ def call_deepseek(ideas: list[str], num_questions: int = 8) -> list[dict]:
         )
     }
 
+    # Llamada a la API de DeepSeek para generar preguntas
     try:
         resp = client.chat.completions.create(
             model="deepseek-chat",
@@ -46,10 +47,12 @@ def call_deepseek(ideas: list[str], num_questions: int = 8) -> list[dict]:
         )
         raw = resp.choices[0].message.content
         # Extraer JSON aunque venga en un fence ```json
+        # se limpia el texto para evitar problemas de formato
         m = re.search(r"```(?:json)?\n([\s\S]+?)```", raw)
         payload = m.group(1).strip() if m else raw.strip()
         data = json.loads(payload)
         return data.get("questions", [])
+        #devuelve una lista de preguntas con opciones y respuesta correcta
     
     except Exception as e:
         print(f"[ERROR] DeepSeek: {e}")

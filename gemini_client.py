@@ -10,6 +10,7 @@ genai.configure(api_key=API_KEY)
 MODEL_NAME = "gemini-1.5-flash"
 
 def call_gemini(text: str) -> List[str]:
+    # Llama a la API de Gemini para extraer ideas principales del texto.
     prompt = (
         "Eres un asistente experto en comprensión de textos. "
         "Extrae entre 5 y 8 ideas principales del siguiente texto. "
@@ -29,10 +30,14 @@ def call_gemini(text: str) -> List[str]:
 
     # Parseo de ideas numeradas
     ideas = []
+    #busca las líneas que comienzan con un número seguido de punto y espacio
     for line in content.splitlines():
+        #representan las ideas principales
         m = re.match(r"^\s*\d+\.\s*(.+)", line)
+        #captura el texto de la idea, lo limpia de espacios innecesarios y lo agrega a la lista de ideas si no está repetido
         if m:
             idea = m.group(1).strip()
             if idea and idea not in ideas:
                 ideas.append(idea)
+    # Retorna hasta 8 ideas únicas
     return ideas[:8]
